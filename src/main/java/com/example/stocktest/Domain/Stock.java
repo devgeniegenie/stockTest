@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.transaction.Transactional;
 
 @Entity
 public class Stock {
@@ -31,7 +32,6 @@ public class Stock {
     public Long getQuantity() {
         return quantity;
     }
-
     public void decrease(Long quantity) {
         if (this.quantity - quantity < 0) {
             throw new RuntimeException("재고는 0개 미만이 될 수 없습니다");
