@@ -1,4 +1,4 @@
-package com.example.stocktest.Service;
+package com.example.stocktest.facade;
 
 import com.example.stocktest.Domain.Stock;
 import com.example.stocktest.Repository.StockRepository;
@@ -12,40 +12,31 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class StockServiceTest {
+class OptimisticLockStockFacadeTest {
 
     @Autowired
-//    private StockService stockService;
-    private PessimisticLockStockService stockService;
+    private OptimisticLockStockFacade optimisticLockStockFacade;
 
     @Autowired
     private StockRepository stockRepository;
 
     @BeforeEach
-    public void before() {
-        stockRepository.saveAndFlush(new Stock(1L, 100L));
+    public void insert() {
+        Stock stock = new Stock(1L, 100L);
+
+        stockRepository.saveAndFlush(stock);
     }
 
     @AfterEach
-    public void after() {
+    public void delete() {
         stockRepository.deleteAll();
     }
 
     @Test
-    public void 재고감소() {
-        stockService.decrease(1L, 1L);
-
-        //100 -1  = 99여야함
-        Stock stock = stockRepository.findById(1L).orElseThrow();
-
-        assertEquals(99, stock.getQuantity());
-    }
-
-    @Test
-    public void 동시에_100개의_요청() throws InterruptedException {
+    public void 동시에_100개의요청() throws InterruptedException {
         int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
@@ -53,7 +44,9 @@ class StockServiceTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    stockService.decrease(1L, 1L);
+                    optimisticLockStockFacade.decrease(1L, 1L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 } finally {
                     latch.countDown();
                 }
@@ -64,10 +57,7 @@ class StockServiceTest {
 
         Stock stock = stockRepository.findById(1L).orElseThrow();
 
-        // 100 - (1 * 100) = 0
+        // 100 - (100 * 1) = 0
         assertEquals(0, stock.getQuantity());
-        //실패 (레이스 컨디션 : 둘 이상의 Thread가 공유 데이터에 엑세스 할 수 있고 동시에 변경을 하려고 할때 발생하는 문제)
-        //Thread1이 1 줄이고 갱신되기 이전에 Thread2가 가져가서 갱신되기 전의 값을 가져와서 갱신함
     }
-
 }

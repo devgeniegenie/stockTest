@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 
 @Service
-public class PessimisticLockService {
+public class PessimisticLockStockService {
 
     private final StockRepository stockRepository;
 
-    public PessimisticLockService(StockRepository stockRepository) {
+    public PessimisticLockStockService(StockRepository stockRepository) {
         this.stockRepository = stockRepository;
     }
 
