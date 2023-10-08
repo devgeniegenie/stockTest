@@ -3,8 +3,8 @@ package com.example.stocktest.Service;
 import com.example.stocktest.Domain.Stock;
 import com.example.stocktest.Repository.StockRepository;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StockService {
@@ -15,8 +15,8 @@ public class StockService {
         this.stockRepository = stockRepository;
     }
 
-//    @Transactional
-    public synchronized void decrease(Long id, Long quantity) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW) //자식 트렌젝션과 별도로 실행되어야 하기 때문에 프로퍼게이션 설정
+    public void decrease(Long id, Long quantity) {
         // Stock 조회
         Stock stock = stockRepository.findById(id).orElseThrow();
         // 재고 감소
