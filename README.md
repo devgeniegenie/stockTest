@@ -13,6 +13,6 @@
 10. create database stock_example;
 11. use stock_example;
 12. redis 이미지 다운로드 : wsl에서 docker pull redis
-13. 컨테이너 실행 : docker run --name myredis -d -p 6379:6379 redis
+13. 컨테이너 실행 : docker run --name myredis -d -p 6379:6379 redis (spring redis 설정의 기본 url=localhost,port=6379)
 14. docker exec -it "redis container id" redis-cli
 15. setnx 1 lock, del 1
